@@ -1,98 +1,85 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useState } from "react";
+import { Button, LogBox, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+export default function Index() {
+  const [data, setData] = useState("");
+  const MyObj = {
+    name: "Deep",
+    Pass: "123",
+    age: 20,
+    isDevelop: true,
+  };
+  //setItem
+  const saveData = async function () {
+    await AsyncStorage.setItem("user", "Deep");
+  };
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+  //getItem
+  const getData = async () => {
+    const value=await AsyncStorage.getItem("user");
+    setData(value!)
+  };
+
+  //remove Item
+  const removeItem = async () => {
+    await AsyncStorage.removeItem("user");
+    // setData("")
+  };
+
+  const clearStorage = async () => {
+    await AsyncStorage.clear();
+    setData("");
+  };
+  const getKeys = async () => {
+    const keys1=await AsyncStorage.getAllKeys();
+    console.log(keys1);
+    
+  };
+  const saveMultiple = async () => {
+    await AsyncStorage.multiSet([
+      ["user1", "DDD"],
+      ["user2", "duhaue"],
+    ]);
+    // 
+    
+
+  };
+  const getMultiple = async () => {
+    const datas = await AsyncStorage.multiGet(["user1", "user2"]);
+    console.log(datas);
+    
+  };
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
-
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        gap: 12,
+        padding: 20,
+        justifyContent: "center",
+      }}
+    >
+      <Button title="Save one Item" onPress={saveData} />
+      <Button title="Get One Item" onPress={getData} />
+      <Button title="remove one Item" onPress={removeItem} />
+      <Button title="Save multiple Item" onPress={saveMultiple} />
+      <Button title="Get multiple Item" onPress={getMultiple} />
+      <Button title="Get  all keys" onPress={getKeys} />
+      <Button title="delete all items" onPress={clearStorage} />
+      <View>
+        <Text style={{fontSize:18}}>OutPut is :</Text>
+        <Text>{data}</Text>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
