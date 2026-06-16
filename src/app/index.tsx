@@ -83,35 +83,109 @@
 //   },
 // });
 
-import * as SecureStore from "expo-secure-store";
-import React, { useState } from "react";
+// =========================================================================
+
+// import * as SecureStore from "expo-secure-store";
+// import React, { useState } from "react";
+// import { StyleSheet, Text, View } from "react-native";
+
+// const index = () => {
+//   const [output, setOutput] = useState("");
+
+//   const setItem = async () => {
+//     await SecureStore.setItemAsync("token", "Deep123");
+//     setOutput("Token Saved");
+//   };
+
+//   const getToken = async () => {
+//     const result = await SecureStore.getItemAsync("token");
+//     setOutput(result!);
+//   };
+
+//   const deleteToken = async () => {
+//     await SecureStore.deleteItemAsync("token");
+//     setOutput("token deleted");
+//   };
+
+//   const checkAvailability = async () => {
+//     const available = await SecureStore.isAvailableAsync();
+//     setOutput(
+//       available ? "secureStore Available" : "SecureStore Not Available",
+//     );
+//   };
+
+//   return (
+//     <View>
+//       <Text>index</Text>
+//     </View>
+//   );
+// };
+
+// export default index;
+
+// const styles = StyleSheet.create({});
+
+// ==============================================================
+
+import * as SQLite from "expo-sqlite";
 import { StyleSheet, Text, View } from "react-native";
 
+import React, { useEffect, useState } from "react";
+
+const db = SQLite.openDatabaseSync("demo.db");
 const index = () => {
   const [output, setOutput] = useState("");
-
-  const setItem = async () => {
-    await SecureStore.setItemAsync("token", "Deep123");
-    setOutput("Token Saved");
+  const createTable = () => {
+    db.execSync(`
+      Create table if not exists users(
+      id integer primary key autoincrement,
+      name text,
+      age integer
+      );
+      `);
+    setOutput("Table Created");
   };
 
-  const getToken = async () => {
-    const result = await SecureStore.getItemAsync("token");
-    setOutput(result!);
+  const insertData = () => {
+    db.runSync("Insert into users (name,age) values(?,?)", "Deep", 20);
+    setOutput("DAta Inserted");
   };
 
-  const deleteToken = async () => {
-    await SecureStore.deleteItemAsync("token");
-    setOutput("token deleted");
+  const getUsers = () => {
+    const data = db.getAllSync(`
+      select * from users
+      `);
+    setOutput(JSON.stringify(data, null, 2));
   };
 
-  const checkAvailability = async () => {
-    const available = await SecureStore.isAvailableAsync();
-    setOutput(
-      available ? "secureStore Available" : "SecureStore Not Available",
-    );
+  const getFirstUser = () => {
+    const data = db.getFirstSync(`
+      select * from users
+      `);
+    setOutput(JSON.stringify(data, null, 2));
   };
-  
+
+  const updateUser = () => {
+    db.runSync(`update users set age=? where id=?`, 25, 1);
+    setOutput("User Data Updated");
+  };
+  const DeleteUser = () => {
+    db.runSync(`Delete from users where id=?`, 1);
+    setOutput("User Deleted");
+  };
+
+  const dropTable = () => {
+    db.execSync(`Drop  table if exists users`);
+    setOutput("Table Dropped");
+  };
+  // ***************
+  const statement = db.prepareSync(`insert into users (name,age) values (?,?)`);
+  statement.executeSync(["Deep", 23, "Ris", 23]);
+  //************
+
+  useEffect(() => {
+    createTable();
+  }, []);
   return (
     <View>
       <Text>index</Text>
